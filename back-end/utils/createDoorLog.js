@@ -1,56 +1,128 @@
-const axios = require('axios');
+const { query } = require("express");
+const pool = require("../config/database");
 
-const API_BASE_URL = 'http://localhost:3000/api/logDoors';
+const createDoorLog = (data) => {
+  return new Promise((resolve, reject) => {
+    pool.query(
+      "INSERT INTO door_log_table (userId, doorId, Time, currentStatus) VALUES (?, ?, ?, ?);",
+      [data.userId, data.doorId, data.Time, data.currentStatus],
+      (error, results) => {
+        if (error) {
+          return reject(error);
+        }
+        resolve(results);
+      }
+    );
+  });
+};
 
-const createAndHandleDoorLog = async (doorLogData, isFinalUpdate = false) => {
+const updateDoorCurrentState = (data) => {
+  return new Promise((resolve, reject) => {
+    pool.query(
+      "UPDATE door_table SET currentState = ? WHERE id = ?",
+      [data.currentState, data.id],
+      (error, results) => {
+        if (error) {
+          return reject(error);
+        }
+        resolve(results);
+      }
+    );
+  });
+};
+
+const createAndHandleDoorLog = async (req, res) => {
+  const doorLogData = req.body;
+  let Time = "";
+  const getTime = () => {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Colombo",
+    });
+    const currentDate = new Date();
+    const formatDateTime = formatter.format(currentDate);
+    Time = formatDateTime.toString();
+  };
+
+  console.log(Time);
+
+  const updateDoorStatus = async (doorId, status) => {
+    try {
+      const updateResponse = await updateDoorCurrentState({
+        id: doorId,
+        currentState: status,
+      });
+    } catch (error) {
+      console.error("Error updating door status:", error);
+    }
+  };
+
+  const createLog = async (userId, doorId, Time, status) => {
+    try {
+      const Log = await createDoorLog({
+        userId: userId,
+        doorId: doorId,
+        Time: Time,
+        currentStatus: status,
+      });
+      console.log("Door Log created");
+    } catch (error) {
+      console.error("Error Door Log", error);
+    }
+  };
+
   try {
-    const createLogResponse = await axios.post(`${API_BASE_URL}/`, doorLogData);
-    console.log("Door log created:", createLogResponse.data);
-    const doorId = doorLogData.doorId;
-    await updateDoorStatus(doorId, 1);
+    const createOpenTime = async () => {
+      getTime();
+      await createLog(doorLogData.userId, doorLogData.doorId, Time, 1);
+    };
+
+    const createCloseTime = async () => {
+      getTime();
+      await createLog(doorLogData.userId, doorLogData.doorId, Time, 0);
+    };
+
+    const updateDoorStatusOpen = async () => {
+      await updateDoorStatus(doorLogData.doorId, 1);
+      console.log("Door Table Status Updated to Open");
+    };
+
+    const updateDoorStatusClose = async () => {
+      await updateDoorStatus(doorLogData.doorId, 0);
+      console.log("Door Table Status Updated to Close");
+    };
+
+    createOpenTime();
+    updateDoorStatusOpen();
 
     setTimeout(async () => {
-      await updateDoorStatus(doorId, 0);      
-      if (!isFinalUpdate) {        
-        const formatter = new Intl.DateTimeFormat("en-US", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-          timeZone: "Asia/Colombo",
-        });
-        const currentDate = new Date();
-        const formatDateTime = formatter.format(currentDate);
-        const closeTime = formatDateTime.toString(); 
-        await createAndHandleDoorLog({
-          userId: doorLogData.userId,
-          doorId: doorLogData.doorId,
-          Time: closeTime,
-          currentStatus: 0,
-        }, true);
-      }
+      createCloseTime();
+      updateDoorStatusClose();
     }, 30000);
+
+    if (res) {
+      res.status(200).json({
+        success: 1,
+        message: "Door log created and status updated successfully",
+      });
+    }
   } catch (error) {
     console.error("Error handling door log:", error);
+    if (res) {
+      res.status(500).json({
+        success: 0,
+        message: "Server Error",
+      });
+    }
   }
 };
 
-const updateDoorStatus = async (doorId, status) => {
-  try {
-    const updateResponse = await axios.put(`${API_BASE_URL}/`, {
-      id: doorId,
-      currentState: status,
-    });
-    console.log('Door status updated:', updateResponse.data);
-  } catch (error) {
-    console.error('Error updating door status:', error);
-  }
-};
-  
-
- module.exports = {  
+module.exports = {
   createAndHandleDoorLog,
 };

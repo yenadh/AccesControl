@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ThemeToggle from "../components/ThemeToggle";
 import LoginSide from "../images/bg.jpg";
 import axios from "axios";
@@ -6,9 +6,9 @@ import { useNavigate } from "react-router-dom";
 import LoginPopUp from "../components/LoginPopUp";
 
 function Login() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [Msg, setMsg] = useState("")
-  const[msgStatus, setMsgStatus] = useState()
+  const [isOpen, setIsOpen] = useState(false);
+  const [Msg, setMsg] = useState("");
+  const [msgStatus, setMsgStatus] = useState();
   const [users, setUsers] = useState({
     userName: "",
     password: "",
@@ -21,23 +21,34 @@ function Login() {
   const navigate = useNavigate();
 
   axios.defaults.withCredentials = true;
-  const handleSubmit = (event) => {
-    axios.post("http://localhost:3000/api/user/login", users)
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/api/user/login/userData")
       .then((res) => {
         if (res.data.success === 1) {
-          setIsOpen(true)
-          setMsg(res.data.message)
-          setMsgStatus(res.data.success)
-        }else{
-          setIsOpen(true)
-          setMsg(res.data.message)
-          setMsgStatus(res.data.success)          
+          navigate("/");
         }
-        
+      })
+      .catch((err) => "");
+  }, []);
+
+  const handleSubmit = (event) => {
+    axios
+      .post("http://localhost:3000/api/user/login", users)
+      .then((res) => {
+        if (res.data.success === 1) {
+          setIsOpen(true);
+          setMsg(res.data.message);
+          setMsgStatus(res.data.success);
+        } else {
+          setIsOpen(true);
+          setMsg(res.data.message);
+          setMsgStatus(res.data.success);
+        }
       })
       .catch((err) => console.log(err));
   };
-
 
   return (
     <>
@@ -150,12 +161,14 @@ function Login() {
                     </svg>
                     <span className="absolute bg-white bottom-0 w-0 left-1/2 h-full -translate-x-1/2 transition-all ease-in-out duration-300 group-hover:w-[105%] -z-[1] group-focus:w-[105%]"></span>
                   </a>
-                  
                 </div>
 
-                <LoginPopUp isOpen={isOpen} setIsOpen={setIsOpen} Msg={Msg} Status={msgStatus} />
-
-                
+                <LoginPopUp
+                  isOpen={isOpen}
+                  setIsOpen={setIsOpen}
+                  Msg={Msg}
+                  Status={msgStatus}
+                />
 
                 {/* <div className="flex justify-center">
                   <button

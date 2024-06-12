@@ -1,6 +1,6 @@
 const { query } = require("express");
 const pool = require("../../config/database");
-const {createAndHandleDoorLog } = require('../../utils/createDoorLog');
+const { createAndHandleDoorLog } = require("../../utils/createDoorLog");
 
 module.exports = {
   getDoorCurrentStateById: (id, callBack) => {
@@ -16,10 +16,10 @@ module.exports = {
     );
   },
 
-  updateDoorCurrentState: (data, callBack) => {
+  getDoorPositionById: (id, callBack) => {
     pool.query(
-      `UPDATE door_table SET currentState = ? WHERE id = ?`,
-      [data.currentState, data.id],
+      `Select id,latitude,longitude from door_table where id = ?`,
+      [id],
       (error, results, fields) => {
         if (error) {
           callBack(error);
@@ -29,44 +29,33 @@ module.exports = {
     );
   },
 
-  createDoorLog: (data, callBack) => {
-    pool.query(
-      `INSERT INTO door_log_table (userId, doorId, Time, currentStatus) VALUES (?, ?, ?, ?);`,
-      [data.userId, data.doorId, data.Time, data.currentStatus],
-      (error, results, fields) => {
-        if (error) {
-          return callBack(error);
+  createDoorLog: (data) => {
+    return new Promise((resolve, reject) => {
+      pool.query(
+        "INSERT INTO door_log_table (userId, doorId, Time, currentStatus) VALUES (?, ?, ?, ?);",
+        [data.userId, data.doorId, data.Time, data.currentStatus],
+        (error, results) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(results);
         }
-        return callBack(null, results[0]);
-      }
-    );
+      );
+    });
   },
 
-  log: (data,callBack) => {    
-    const formatter = new Intl.DateTimeFormat("en-US", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-      timeZone: "Asia/Colombo",
+  updateDoorCurrentState: (data) => {
+    return new Promise((resolve, reject) => {
+      pool.query(
+        "UPDATE door_table SET currentState = ? WHERE id = ?",
+        [data.currentState, data.id],
+        (error, results) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(results);
+        }
+      );
     });
-    const currentDate = new Date();
-    const formatDateTime = formatter.format(currentDate);
-    const openTime = formatDateTime.toString();   
-    try {
-      createAndHandleDoorLog({
-        userId: data.userId,
-        doorId: data.doorId,
-        Time: openTime,
-        currentStatus: 1
-    });      
-    return callBack(null);
-    } catch (error) {
-      return callBack(error);
-    }
-  } 
- 
+  },
 };

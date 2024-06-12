@@ -4,6 +4,7 @@ const {
   getMapDoor,
   deleteMapDoor,
   create,
+  getLocation,
 } = require("../mapDoors/mapDoors.service");
 
 module.exports = {
@@ -69,6 +70,16 @@ module.exports = {
         return res.status(404).json({ error: "Mapping not found" });
       }
       return res.json({ message: "Mapping deleted successfully" });
+    });
+  },
+
+  getLocation: (req, res) => {
+    getLocation((err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      return res.json(results);
     });
   },
 };

@@ -124,6 +124,7 @@ const UpdateDoor = () => {
   //Data validation
   const validateUserData = () => {
     event.preventDefault();
+    const letterRegex = /^[a-zA-Z]+$/;
     if (!doors.doorName) {
       setMsgalert("Door Name is required");
       setShowAlertR(true);
@@ -140,12 +141,18 @@ const UpdateDoor = () => {
       setMsgalert("Latitude is required");
       setShowAlertR(true);
       return false;
+    } else if (letterRegex.test(doors.latitude)) {
+      setMsgalert("Invalid Latitude");
+      setShowAlertR(true);
     }
 
     if (!doors.longitude) {
       setMsgalert("Longitude is required");
       setShowAlertR(true);
       return false;
+    } else if (letterRegex.test(doors.longitude)) {
+      setMsgalert("Invalid Longitude");
+      setShowAlertR(true);
     }
 
     return true;
@@ -323,7 +330,7 @@ const UpdateDoor = () => {
                     name="latitude"
                     value={latitude ? latitude : doors.latitude}
                     onChange={handleChange}
-                    type="number"
+                    type="text"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[300px] ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     required=""
                     placeholder="1.xxxxxxx"
@@ -348,12 +355,21 @@ const UpdateDoor = () => {
                     name="longitude"
                     value={longitude ? longitude : doors.longitude}
                     onChange={handleChange}
-                    type="number"
+                    type="text"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[300px] ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     required=""
                     placeholder="123.xxxxxxx"
                   />
                 </div>
+              </div>
+              <div className="flex mt-[20px] w-full">
+                <button
+                  onClick={getLatitudeAndLongitude}
+                  type="button"
+                  className="relative top-7 h-[44px] text-black focus:outline-none bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
+                >
+                  Get Location
+                </button>
               </div>
             </div>
 
@@ -388,15 +404,6 @@ const UpdateDoor = () => {
                 Update
                 <SpringModal isOpen={isOpen} setIsOpen={setIsOpen} />
               </button>
-
-              <div className="relative top-2">
-                <span
-                  className="text-sm text-blue-700 hover:underline cursor-pointer font-medium"
-                  onClick={getLatitudeAndLongitude}
-                >
-                  Get Location
-                </span>
-              </div>
             </div>
           </div>
         </div>

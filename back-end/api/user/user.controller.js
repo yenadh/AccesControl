@@ -10,12 +10,12 @@ const {
   getEmailbyId,
   verifyToken,
   resetPassword,
-  invalidateToken
+  invalidateToken,
 } = require("./user.service");
 
 const { genSaltSync, hashSync, compareSync } = require("bcrypt");
-const {sign} = require('jsonwebtoken');
-const cookieParser = require('cookie-parser');
+const { sign } = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 
 module.exports = {
   createUser: (req, res) => {
@@ -113,7 +113,8 @@ module.exports = {
       if (!results) {
         return res.json({
           success: 0,
-          message: "No records in the Database enter different User Name and Password",
+          message:
+            "No records in the Database enter different User Name and Password",
         });
       }
 
@@ -129,7 +130,8 @@ module.exports = {
             success: 1,
             message: "Login succsessfully",
             token: jsonwebtoken,
-            passwords: results.password,
+            id: results.id,
+            userName: results.userName,
           });
         } else {
           return res.json({
@@ -139,23 +141,45 @@ module.exports = {
           });
         }
       } else {
-        return res.json({
-          success: 0,
-          message: "Invalid User or User is not Active",
-          passwords: results.password,
-        });
+        if (results.userType === "Employee" && results.userStatus === 1) {
+          const result = compareSync(body.password, results.password);
+          if (result) {
+            results.password = undefined; //hardCoded need to change|
+            const jsonwebtoken = sign({ result: results }, "1234qwer", {
+              expiresIn: "2d",
+            });
+            return res.json({
+              success: 1,
+              message: "Login succsessfully",
+              token: jsonwebtoken,
+              id: results.id,
+              userName: results.userName,
+            });
+          } else {
+            return res.json({
+              success: 0,
+              message: "Invallid Email or Password",
+              passwords: results.password,
+            });
+          }
+        } else {
+          return res.json({
+            success: 0,
+            message: "Invalid User or User is not Active",
+            passwords: results.password,
+          });
+        }
       }
     });
   },
 
   logOut: (req, res) => {
-    res.clearCookie('token'); // Corrected method name
+    res.clearCookie("token"); // Corrected method name
     return res.json({
       success: 1,
       message: "Ok",
     });
-},
-
+  },
 
   getEmail: (req, res) => {
     const email = req.params.email;
@@ -219,7 +243,8 @@ module.exports = {
         console.log(err);
         return res.status(500).json({ success: 0, data: "Server Error" }); // Send proper error response
       }
-      if (results.affectedRows === 0) { // Check for affectedRows property
+      if (results.affectedRows === 0) {
+        // Check for affectedRows property
         return res.json({
           success: 0,
           data: "Password update Failed",
@@ -231,7 +256,4 @@ module.exports = {
       });
     });
   },
-
-  
-  
 };

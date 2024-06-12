@@ -15,6 +15,14 @@ app.use("/api/door", doorRouter);
 app.use("/api/logDoors", logDoors);
 app.use("/api/mapDoor", mapDoors);
 
-app.listen(process.env.APP_PORT, () => {
-  console.log("Connected to backend port: ", process.env.APP_PORT);
+// app.listen(process.env.APP_PORT, "192.168.2.143", () => {
+//   console.log("Connected to backend port: ", process.env.APP_PORT);
+// });
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
+app.listen(process.env.APP_PORT, "0.0.0.0", () => {
+  console.log(`Server running at http://0.0.0.0:${process.env.APP_PORT}`);
 });

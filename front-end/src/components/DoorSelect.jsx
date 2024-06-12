@@ -189,8 +189,8 @@ const DoorSelect = ({ isShow, setIsShow, id }) => {
                                       className="flex space-x-2"
                                       key={`${door.id}-non`}
                                     >
-                                      <div className="flex right-0 z-10 mt-2 w-50 px-2 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                        <li className="mr-[60px] text-sm">
+                                      <div className="flex align-middle justify-between mt-2 w-[200px] px-2 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                        <li className="text-sm">
                                           {door.doorName}
                                         </li>
                                         <svg
@@ -260,15 +260,15 @@ const DoorSelect = ({ isShow, setIsShow, id }) => {
                                         className=" flex"
                                         key={`${door.id}-exist`}
                                       >
-                                        <div className="flex right-0 z-10 mt-2 w-50 px-2 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                          <li className="mr-[80px] text-sm">
+                                        <div className="flex align-middle justify-between z-10 mt-2 w-[200px] px-2 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                          <li className="text-sm">
                                             {door.doorName}
                                           </li>
                                           <svg
                                             onClick={() =>
                                               handleRemoveDoor(locationId, door)
                                             }
-                                            className=" cursor-pointer"
+                                            className="cursor-pointer"
                                             width="20px"
                                             height="20px"
                                             viewBox="0 0 24 24"

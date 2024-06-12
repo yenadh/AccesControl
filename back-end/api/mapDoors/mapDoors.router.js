@@ -3,6 +3,7 @@ const {
   getMapDoor,
   deleteMapDoor,
   create,
+  getLocation,
 } = require("./mapDoors..controller");
 const router = require("express").Router();
 const { checkToken } = require("../../auth/token_validation");
@@ -23,5 +24,6 @@ router.post("/", checkToken, create);
 router.get("/:id", getDoorMapById);
 router.get("/", getMapDoor);
 router.delete("/", deleteMapDoor);
+router.get("/location/location", getLocation);
 
 module.exports = router;

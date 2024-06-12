@@ -23,7 +23,23 @@ module.exports = {
 
   getDoorMapById: (id, callBack) => {
     pool.query(
-      `Select * from user_door_mapping where user_id = ?`,
+      `SELECT 
+        udm.id,
+        udm.user_id,
+        udm.door_id,
+        d.doorName,
+        udm.location_id,
+        l.locationName,
+        udm.last_updated_date,
+        udm.updated_user
+    FROM 
+      user_door_mapping udm
+    JOIN 
+      door_table d ON udm.door_id = d.id
+    JOIN 
+      locationtable l ON udm.location_id = l.id
+    WHERE 
+      udm.user_id = ?;`,
       [id],
       (error, results, fields) => {
         if (error) {
@@ -51,6 +67,19 @@ module.exports = {
     pool.query(
       `DELETE FROM user_door_mapping WHERE user_id = ? AND door_id = ?`,
       [userId, doorId],
+      (error, results, fields) => {
+        if (error) {
+          return callBack(error);
+        }
+        return callBack(null, results);
+      }
+    );
+  },
+
+  getLocation: (callBack) => {
+    pool.query(
+      `Select id,locationName from locationtable`,
+      [],
       (error, results, fields) => {
         if (error) {
           return callBack(error);

@@ -2,9 +2,9 @@ const pool = require("../../config/database");
 const {
   getDoorCurrentStateById,
   updateDoorCurrentState,
-  createDoorLog,log
+  createDoorLog,
+  getDoorPositionById,
 } = require("./logDoors.services");
-
 
 module.exports = {
   getDoorCurrentStateById: (req, res) => {
@@ -36,63 +36,23 @@ module.exports = {
     });
   },
 
-  updateDoorCurrentState: (req, res) => {
-    const body = req.body;
-    updateDoorCurrentState(body, (err, results) => {
+  getDoorPositionById: (req, res) => {
+    const id = req.params.id;
+    getDoorPositionById(id, (err, results) => {
       if (err) {
         console.log(err);
         return res.status(500).json({
           success: 0,
-          message: "Server Error",
+          data: "Server Error",
         });
       }
-      if (results) {
+      if (!results) {
         return res.status(204).json({
           success: 0,
-          message: "No records to Update",
+          message: "No records found",
         });
       }
-      return res.status(200).json({
-        success: 1,
-        message: "Data Updated Succesfully",
-      });
+      return res.status(200).json(results);
     });
   },
-
-  createDoorLog: (req, res) => {
-    const body = req.body;
-    createDoorLog(body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          success: 0,
-          message: "Database connection error",
-        });
-      }
-      return res.status(200).json({
-        success: 1,
-        message: "Record Created",
-      });
-    });
-  },
-
-
-  //******
-  log: (req, res) => {
-    const body = req.body;
-    log(body, (err, results) => {
-      if(err){
-        console.log(err);
-        return res.status(500).json({
-          success: 0,
-          message: "Database connection error",
-        });
-      }
-      return res.status(200).json({
-        success: 1,
-        message: "Log Created",
-      });
-    })
-  },
-
 };

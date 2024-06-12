@@ -1,4 +1,8 @@
-const {getDoorCurrentStateById, updateDoorCurrentState, createDoorLog, log} = require("./logDoors.controller")
+const {
+  getDoorCurrentStateById,
+  getDoorPositionById,
+} = require("./logDoors.controller");
+const { createAndHandleDoorLog } = require("../../utils/createDoorLog");
 const router = require("express").Router();
 const { checkToken } = require("../../auth/token_validation");
 const cors = require("cors");
@@ -15,8 +19,7 @@ router.use(
 );
 
 router.get("/:id", getDoorCurrentStateById);
-router.put("/", updateDoorCurrentState);
-router.post("/", createDoorLog);
-router.post("/log/log", log);
+router.get("/position/:id", getDoorPositionById);
+router.post("/log", createAndHandleDoorLog);
 
-module.exports = router
+module.exports = router;
